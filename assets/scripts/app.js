@@ -5,50 +5,73 @@ const fetchButton = document.querySelector("#available-posts button");
 const postList = document.querySelector("ul");
 
 function sendHttpRequest(method, url, data) {
-  const promise = new Promise((resolve, reject) => {
-    const xhrequest = new XMLHttpRequest();
-    xhrequest.open(method, url);
+  //   const promise = new Promise((resolve, reject) => {
+  // const xhrequest = new XMLHttpRequest();
+  // xhrequest.open(method, url);
 
-    xhrequest.responseType = "json"; //!with responseType there is no need for JSON.parse
+  // xhrequest.responseType = "json"; //!with responseType there is no need for JSON.parse
 
-    xhrequest.addEventListener("load", () => {
-      if (xhrequest.status >= 200 && xhrequest.status < 300) {
-        resolve(xhrequest.response);
+  // xhrequest.addEventListener("load", () => {
+  //   if (xhrequest.status >= 200 && xhrequest.status < 300) {
+  //     resolve(xhrequest.response);
+  //   } else {
+  //     reject(new Error("Something in the way"));
+  //   }
+  // });
+
+  // xhrequest.addEventListener("error", () => {
+  //   new Error("failed to send request");
+  // });
+  // //?open takes two para. 1=> method 2=> URL
+  // //!in order to send the request we use send()
+  // xhrequest.send(JSON.stringify(data));
+
+  // });
+  //       return promise;
+
+  //******* new API fetching method as alternative to XHMLHttpRequest  */
+  return fetch(url, {
+    method: method,
+    body: JSON.stringify(data),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then((dataResponse) => {
+      if (dataResponse.status >= 200 && dataResponse.status < 300) {
+        return dataResponse.json();
       } else {
-        reject(new Error("Something in the way"));
+        return dataResponse.json().then((error) => {
+          console.log(error);
+          throw new Error("Something went wrong-server side");
+        });
       }
+    })
+    .catch((error) => {
+      console.log(error);
+      throw new Error("something went wrong!");
     });
-
-    xhrequest.addEventListener("error", () => {
-      new Error("failed to send request");
-    });
-    //?open takes two para. 1=> method 2=> URL
-    //!in order to send the request we use send()
-    xhrequest.send(JSON.stringify(data));
-  });
-
-  return promise;
 }
 
 async function fetchPosts() {
-  try {
-    const responseData = await sendHttpRequest(
-      "GET",
-      "https://jsonplaceholder.typicode.com/posts/"
-    );
+  //   try {
+  const responseData = await sendHttpRequest(
+    "GET",
+    "https://jsonplaceholder.typicode.com/posts"
+  );
 
-    const info = responseData;
-    console.log(info);
-    for (let post of info) {
-      const postElement = document.importNode(postTemplate.content, true); //! we make a deep clone
-      postElement.querySelector("h2").textContent = post.title.toUpperCase();
-      postElement.querySelector("p").textContent = post.body;
-      postElement.querySelector("li").id = post.id;
-      listElement.append(postElement);
-    }
-  } catch (error) {
-    alert(error);
+  const info = responseData;
+  console.log(info);
+  for (let post of info) {
+    const postElement = document.importNode(postTemplate.content, true); //! we make a deep clone
+    postElement.querySelector("h2").textContent = post.title.toUpperCase();
+    postElement.querySelector("p").textContent = post.body;
+    postElement.querySelector("li").id = post.id;
+    listElement.append(postElement);
   }
+  //   } catch (error) {
+  //     alert(error);
+  //   }
 }
 
 // fetchPosts();
@@ -81,6 +104,7 @@ form.addEventListener("submit", (event) => {
   enteredContent.value = "";
 });
 
+//!deleting a post
 postList.addEventListener("click", (event) => {
   //   if (event.target.classList.contains("btn")) {
   //     console.log("clicked a button");
