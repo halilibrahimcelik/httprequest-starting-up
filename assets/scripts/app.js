@@ -32,10 +32,11 @@ function sendHttpRequest(method, url, data) {
   //******* new API fetching method as alternative to XHMLHttpRequest  */
   return fetch(url, {
     method: method,
-    body: JSON.stringify(data),
-    headers: {
-      "Content-Type": "application/json",
-    },
+    // body: JSON.stringify(data),
+    body: data,
+    // headers: {
+    //   "Content-Type": "application/json",
+    // },
   })
     .then((dataResponse) => {
       if (dataResponse.status >= 200 && dataResponse.status < 300) {
@@ -54,24 +55,24 @@ function sendHttpRequest(method, url, data) {
 }
 
 async function fetchPosts() {
-  //   try {
-  const responseData = await sendHttpRequest(
-    "GET",
-    "https://jsonplaceholder.typicode.com/posts"
-  );
+  try {
+    const responseData = await sendHttpRequest(
+      "GET",
+      "https://jsonplaceholder.typicode.com/posts"
+    );
 
-  const info = responseData;
-  console.log(info);
-  for (let post of info) {
-    const postElement = document.importNode(postTemplate.content, true); //! we make a deep clone
-    postElement.querySelector("h2").textContent = post.title.toUpperCase();
-    postElement.querySelector("p").textContent = post.body;
-    postElement.querySelector("li").id = post.id;
-    listElement.append(postElement);
+    const info = responseData;
+    console.log(info);
+    for (let post of info) {
+      const postElement = document.importNode(postTemplate.content, true); //! we make a deep clone
+      postElement.querySelector("h2").textContent = post.title.toUpperCase();
+      postElement.querySelector("p").textContent = post.body;
+      postElement.querySelector("li").id = post.id;
+      listElement.append(postElement);
+    }
+  } catch (error) {
+    alert(error);
   }
-  //   } catch (error) {
-  //     alert(error);
-  //   }
 }
 
 // fetchPosts();
@@ -89,7 +90,16 @@ async function createPost(title, content) {
     userId: userId,
   };
 
-  sendHttpRequest("POST", "https://jsonplaceholder.typicode.com/posts", post);
+  const formData = new FormData();
+  formData.append("title", title);
+  formData.append("body", content);
+  formData.append("userId", userId);
+
+  sendHttpRequest(
+    "POST",
+    "https://jsonplaceholder.typicode.com/posts",
+    formData
+  );
 }
 
 // createPost("TEST", "A dummy post!");
